@@ -2,17 +2,20 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const homeRoute = require('./src/Routes/HomePageRoutes')
-
+const fileUpload = require('express-fileupload');
+const cors = require('cors');
 
 app.use(express.json());
-
 app.use('/', homeRoute);
-
+app.use(cors());
 app.use((req, res, next)=>{
     res.status(200).json({
         messsage: 'app runs'
     })
 })
+app.use(fileUpload({
+    useTempFiles: true
+}))
 
 //Connect to mongo
 mongoose.connect('mongodb+srv://Swordsman48:Swordsman48@ashleyclone.yfprtnd.mongodb.net/?retryWrites=true&w=majority')
