@@ -1,52 +1,66 @@
 const router = require('express').Router();
 const HomePageSchema = require('../schema/homePageSchema');
 const mongoose = require('mongoose');
+const cloudinary = require('cloudinary').v2;
 
 
-router.post('/HomePage', async (req, res, next)=>{
-    const allSubCategories = req.body.subCategory;
-    const subCategories = req.body.subCategory.map(subCat=>({
-        _id: new mongoose.Types.ObjectId(),
-        subCatName: subCat.subCatName,
-        subCatImg: subCat.subCatImg,
-    }))
-    const homeSchema = new HomePageSchema({
-        _id: new mongoose.Types.ObjectId,
-        categoryName: req.body.categoryName,
-        subCategory: subCategories
-    });
+//Couldinary config
+cloudinary.config({
+    cloud_name: 'dzt8twkox',
+    api_key: '283764817279696',
+    api_secret: '7SU4wQpmItRUF8NZMSsQO7Nlzqw',
+    secure: true
+});
 
-    const datafound = await HomePageSchema.findOne({categoryName: req.body.categoryName});
-    // console.log(datafound);
-    if(datafound){
-        subCategories.forEach(subCategory => {
-            datafound.subCategory.push(subCategory);
+
+router.post('/HomePage', async (req, res, next) => {
+    try {
+        // Upload the image to Cloudinary
+        const file = req.files.photo;
+        const mainCategoryName = req.body.categoryName;
+        const mainSubCatName = req.body.subCatName;
+        let imageUrl;
+
+        if (!file) {
+            return res.status(400).json({ error: 'No image file uploaded' });
+        }
+        else {
+            const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath);
+            imageUrl = cloudinaryResponse.url;
+        }
+
+        const subCatObject = {
+            subCatName: mainSubCatName,
+            subCatImg: imageUrl
+        }
+        const homeSchema = new HomePageSchema({
+            _id: new mongoose.Types.ObjectId(),
+            categoryName: mainCategoryName,
+            subCategory: [{
+                subCatName: mainSubCatName,
+                subCatImg: imageUrl
+            }],
         });
 
-        datafound.save()
-            .then(savedData => {
-                res.status(200).json(savedData);
-            })
-            .catch(e => {
-                res.status(500).json({
-                    error: e
-                })
-            });
-    } 
-    else {
+        const datafound = await HomePageSchema.findOne({ categoryName: mainCategoryName });
+        if (datafound) {
+            datafound.subCategory.push(subCatObject);
 
-        homeSchema.save()
-        .then(result => {
-            console.log(result);
+            // Save the updated data
+            const savedData = await datafound.save();
+            res.status(200).json(savedData);
+        }
+        else {
+
+            // Save the new data
+            const result = await homeSchema.save();
             res.status(200).json(result);
-        })
-        .catch(e=>{
-            console.log(e);
-            res.status(500).json({
-                error: e
-            })
-        })
+        }
     }
-})
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 module.exports = router;
