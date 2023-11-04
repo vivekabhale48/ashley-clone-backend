@@ -25,7 +25,7 @@ router.post('/HomePage', async (req, res, next) => {
             return res.status(400).json({ error: 'No image file uploaded' });
         }
         else {
-            const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath);
+            const cloudinaryResponse = await cloudinary.uploader.upload(file.tempFilePath, {folder: 'Ashley_on_Acima_clone_assets'});
             imageUrl = cloudinaryResponse.url;
         }
 
