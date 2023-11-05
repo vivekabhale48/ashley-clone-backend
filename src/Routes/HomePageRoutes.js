@@ -30,16 +30,14 @@ router.post('/HomePage', async (req, res, next) => {
         }
 
         const subCatObject = {
+            _id: new mongoose.Types.ObjectId(),
             subCatName: mainSubCatName,
             subCatImg: imageUrl
         }
         const homeSchema = new HomePageSchema({
             _id: new mongoose.Types.ObjectId(),
             categoryName: mainCategoryName,
-            subCategory: [{
-                subCatName: mainSubCatName,
-                subCatImg: imageUrl
-            }],
+            subCategory: [subCatObject],
         });
 
         const datafound = await HomePageSchema.findOne({ categoryName: mainCategoryName });
