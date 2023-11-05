@@ -61,4 +61,14 @@ router.post('/HomePage', async (req, res, next) => {
     }
 });
 
+router.get('/getHomePage', async (req, res, next) => {
+    try {
+        const homePageData = await HomePageSchema.find();
+        res.status(200).json(homePageData);
+    }
+    catch(error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
 module.exports = router;
