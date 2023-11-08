@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const homeRoute = require('./src/Routes/HomePageRoutes');
+const middleHomeRoute = require('./src/Routes/MiddleHomePageRoute');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
 
@@ -12,7 +13,7 @@ app.use(fileUpload({ useTempFiles: true })); // Handle file uploads
 
 // Routes
 app.use('/', homeRoute); // Use the routes defined in HomePageRoutes.js
-
+app.use('/',middleHomeRoute);
 // Error Handling Middleware
 app.use((err, req, res, next) => {
     console.error(err);
